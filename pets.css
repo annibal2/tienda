@@ -1,0 +1,35 @@
+body {
+    background-image: url('img/dubapets.jpg'); 
+    background-size: cover;
+    background-attachment: fixed;
+}
+
+.main-section {
+    display: flex;
+    justify-content: space-between;
+}
+
+.fondo1, .fondo2 {
+    background-color: rgba(255, 255, 255, 0.8); /* Fondo blanco semi-transparente */
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.margen {
+    margin: 20px;
+}
+
+.table-hover tbody tr:hover td {
+    background-color: rgba(0, 123, 255, 0.2); /* Fondo azul semi-transparente al pasar el cursor */
+}
+
+.img-fluid {
+    max-width: 300px;
+    max-height: 300px;
+    object-fit: cover; 
+}
+
+.product-image {
+    text-align: center;
+    margin-top: 20px;
+}
