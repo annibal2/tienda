@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moda Pets</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="pets.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+    <div id="app">
+        <header class="p-5 bg-primary text-white text-center">
+            <h1>{{ titulo }}</h1>
+            <h3>{{ subtitulo }}</h3>
+        </header>
+
+        <section class="row p-4 main-section">
+            <article class="col-sm-12 fondo1 p-3 margen">
+                <fieldset class="text-center">
+                    <legend class="t2">Tamaño Mínimo: {{ tallaMinima }}</legend>
+                    <input type="range" min="0" max="5" v-model="tallaMinima" class="form-range">
+                    <ol class="list-unstyled texto">
+                        <li v-for="producto in productosFiltrados">{{ producto.nombre }} - Talla: {{ producto.talla }}</li>
+                    </ol>
+                </fieldset>
+
+                <hr>
+
+                <fieldset class="text-center">
+                    <input type="search" placeholder="Buscar Producto" v-model="buscar" class="form-control">
+                    <ol class="list-unstyled texto">
+                        <li v-for="producto in productosBuscados">{{ producto.nombre }} - {{ producto.categoria }}</li>
+                    </ol>
+                    <h3>Coincidencias: {{ productosCoinciden }}</h3>
+                </fieldset>
+                
+                <hr>
+
+                <fieldset class="text-center">
+                    <legend class="t2">Precio Máximo</legend>
+                    <input type="number" v-model="precioMaximo" class="form-control" placeholder="Ingrese el precio máximo">
+                    <ol class="list-unstyled texto">
+                        <li v-for="producto in productosFiltradosPorPrecio">{{ producto.nombre }} - Precio: {{ producto.precio }}</li>
+                    </ol>
+                </fieldset>
+
+                <hr>
+
+                <fieldset class="text-center">
+                    <legend class="t2">Disponibilidad</legend>
+                    <select v-model="disponibilidad" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="disponible">Disponible</option>
+                        <option value="agotado">Agotado</option>
+                    </select>
+                    <ol class="list-unstyled texto">
+                        <li v-for="producto in productosFiltradosPorDisponibilidad">{{ producto.nombre }} - Disponibilidad: {{ producto.disponibilidad }}</li>
+                    </ol>
+                </fieldset>
+            </article>
+
+            <article class="col-sm-11 fondo2 p-3 margen">
+                <h2 class="t3">Lista de Productos</h2>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Talla</th>
+                            <th>Precio</th>
+                            <th>Disponibilidad</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="producto in productos" @mouseover="actImagen(producto.imagen)">
+                            <td>{{ producto.nombre }}</td>
+                            <td>{{ producto.categoria }}</td>
+                            <td>{{ producto.talla }}</td>
+                            <td>{{ producto.precio }}</td>
+                            <td>{{ producto.disponibilidad }}</td>
+                            <td>
+                                <button class="btn btn-primary" @click="mostrarDetalle(producto)">Detalle</button>
+                                <button class="btn btn-secondary" @click="agregarAlCarrito(producto)">Agregar al Carrito</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="product-image mt-3">
+                    <img :src="imagenActual" alt="Imagen del producto" class="img-fluid" style="max-width: 300px; max-height: 300px; object-fit: cover;">
+                </div>
+            </article>
+        </section>
+
+        <div class="modal fade" id="modalDetalle" tabindex="-1" aria-labelledby="detalleLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="detalleLabel">{{ detalleProducto.nombre }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <img :src="detalleProducto.imagen" alt="Imagen del producto" class="img-fluid" style="max-width: 300px; max-height: 300px; object-fit: cover;">
+                        <p>Precio: {{ detalleProducto.precio }}</p>
+                        <p>Descripción: {{ detalleProducto.descripcion }}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modalCarrito" tabindex="-1" aria-labelledby="carritoLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="carritoLabel">Carrito de Compras</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <ul class="list-group">
+                            <li v-for="item in carrito" class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ item.nombre }} - ${{ item.precio }}
+                                <button class="btn btn-danger btn-sm" @click="removerDelCarrito(item)">Quitar</button>
+                            </li>
+                        </ul>
+                        <p class="mt-3"><strong>Total: ${{ totalCarrito }}</strong></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-success" @click="realizarCompra">Comprar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="col-sm-12 mt-5 p-4 bg-primary text-white text-center">
+            <p>{{ mensaje }}</p>
+            <p>Elaborado por {{ nombre.toUpperCase() }}</p>
+            <button class="btn btn-success" @click="incremento">{{ contador }}</button>
+        </footer>
+    </div>
+
+    <script src="pets.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
+
